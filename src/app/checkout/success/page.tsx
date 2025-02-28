@@ -14,13 +14,13 @@ export default function CheckoutSuccessPage() {
           </div>
           <h1 className="text-3xl font-extrabold text-gray-900 mb-4">Payment Successful!</h1>
           <p className="text-lg text-gray-600 mb-8">
-            Thank you for your purchase. You now have access to the course.
+            Thank you for your purchase. You now have access to the product.
           </p>
           <div className="bg-gray-50 p-6 rounded-lg mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Details</h2>
             <div className="flex justify-between mb-2">
-              <span className="text-gray-600">Course:</span>
-              <span className="font-medium">Digital Marketing Fundamentals</span>
+              <span className="text-gray-600">Product:</span>
+              <span className="font-medium text-gray-900">Digital Marketing Resource</span>
             </div>
             <div className="flex justify-between mb-2">
               <span className="text-gray-600">Amount:</span>
@@ -39,10 +39,10 @@ export default function CheckoutSuccessPage() {
               Go to Dashboard
             </Link>
             <Link
-              href="/courses"
+              href="/products"
               className="block w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-3 px-4 rounded"
             >
-              Browse More Courses
+              Browse More Products
             </Link>
           </div>
           <div className="mt-8 text-sm text-gray-500">

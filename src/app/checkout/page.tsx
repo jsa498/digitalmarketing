@@ -9,48 +9,48 @@ import { loadStripe } from '@stripe/stripe-js';
 export default function CheckoutPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const courseId = searchParams.get('courseId');
+  const productId = searchParams.get('productId');
   const [isLoading, setIsLoading] = useState(false);
-  const [course, setCourse] = useState<any>(null);
+  const [product, setProduct] = useState<any>(null);
   const { data: session, status } = useSession();
 
   useEffect(() => {
     // Redirect to login if not authenticated
     if (status === 'unauthenticated') {
-      router.push(`/api/auth/signin?callbackUrl=/checkout?courseId=${courseId}`);
+      router.push(`/api/auth/signin?callbackUrl=/checkout?productId=${productId}`);
     }
 
-    // Fetch course data
-    const fetchCourse = async () => {
+    // Fetch product data
+    const fetchProduct = async () => {
       try {
-        const response = await fetch(`/api/courses/${courseId}`);
+        const response = await fetch(`/api/products/${productId}`);
         if (response.ok) {
           const data = await response.json();
-          setCourse(data);
+          setProduct(data);
         } else {
-          // Handle error - course not found
-          router.push('/courses');
+          // Handle error - product not found
+          router.push('/products');
         }
       } catch (error) {
-        console.error('Error fetching course:', error);
+        console.error('Error fetching product:', error);
         // For now, use mock data if API fails
-        setCourse({
-          id: courseId || '1',
-          title: 'Digital Marketing Fundamentals',
-          description: 'Learn the basics of digital marketing, including SEO, social media, and content marketing.',
-          price: 99.99,
+        setProduct({
+          id: productId || '1',
+          title: 'Digital Marketing Guide',
+          description: 'Comprehensive guide to digital marketing strategies and techniques.',
+          price: 29.99,
         });
       }
     };
 
-    if (courseId) {
-      fetchCourse();
+    if (productId) {
+      fetchProduct();
     }
-  }, [courseId, router, status]);
+  }, [productId, router, status]);
 
   const handleCheckout = async () => {
     if (!session?.user) {
-      router.push(`/api/auth/signin?callbackUrl=/checkout?courseId=${courseId}`);
+      router.push(`/api/auth/signin?callbackUrl=/checkout?productId=${productId}`);
       return;
     }
 
@@ -63,7 +63,7 @@ export default function CheckoutPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          courseId: course.id,
+          productId: product.id,
         }),
       });
 
@@ -80,7 +80,7 @@ export default function CheckoutPage() {
     }
   };
 
-  if (status === 'loading' || !course) {
+  if (status === 'loading' || !product) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
@@ -93,7 +93,7 @@ export default function CheckoutPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold text-gray-900">Checkout</h1>
-          <p className="mt-2 text-lg text-gray-600">Complete your purchase to access the course</p>
+          <p className="mt-2 text-lg text-gray-600">Complete your purchase to access the product</p>
         </div>
 
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -101,14 +101,14 @@ export default function CheckoutPage() {
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Summary</h2>
             <div className="flex justify-between items-center mb-4">
               <div>
-                <h3 className="text-lg font-medium text-gray-900">{course.title}</h3>
-                <p className="text-gray-600">{course.description}</p>
+                <h3 className="text-lg font-medium text-gray-900">{product.title}</h3>
+                <p className="text-gray-600">{product.description}</p>
               </div>
-              <span className="text-2xl font-bold text-indigo-600">${course.price}</span>
+              <span className="text-2xl font-bold text-indigo-600">${product.price}</span>
             </div>
             <div className="border-t border-gray-200 pt-4 flex justify-between">
               <span className="text-lg font-medium text-gray-900">Total:</span>
-              <span className="text-2xl font-bold text-indigo-600">${course.price}</span>
+              <span className="text-2xl font-bold text-indigo-600">${product.price}</span>
             </div>
           </div>
 
@@ -120,7 +120,7 @@ export default function CheckoutPage() {
                 isLoading ? 'opacity-70 cursor-not-allowed' : ''
               }`}
             >
-              {isLoading ? 'Processing...' : `Pay $${course.price}`}
+              {isLoading ? 'Processing...' : `Pay $${product.price}`}
             </button>
             
             <div className="mt-4 text-center">

@@ -13,8 +13,8 @@ export const Footer = () => {
             </Link>
           </div>
           <div className="px-5 py-2">
-            <Link href="/courses" className="text-base text-gray-500 hover:text-gray-900">
-              Courses
+            <Link href="/products" className="text-base text-gray-500 hover:text-gray-900">
+              Products
             </Link>
           </div>
           <div className="px-5 py-2">
@@ -59,7 +59,7 @@ export const Footer = () => {
           </a>
         </div>
         <p className="mt-8 text-center text-base text-gray-400">
-          &copy; {currentYear} Digital Marketing Courses. All rights reserved.
+          &copy; {currentYear} Digital Marketing Resources. All rights reserved.
         </p>
       </div>
     </footer>

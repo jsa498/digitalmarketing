@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Digital Marketing Courses",
-  description: "Learn digital marketing skills with our premium courses",
+  title: "Digital Marketing Resources",
+  description: "Access premium digital marketing resources and PDFs",
 };
 
 export default function RootLayout({
