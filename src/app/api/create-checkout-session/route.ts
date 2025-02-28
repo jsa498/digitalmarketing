@@ -13,47 +13,47 @@ export async function POST(req: Request) {
     
     if (!session?.user) {
       return NextResponse.json(
-        { error: 'You must be logged in to purchase a course' },
+        { error: 'You must be logged in to purchase a PDF' },
         { status: 401 }
       );
     }
 
     const body = await req.json();
-    const { courseId } = body;
+    const { productId } = body;
 
-    if (!courseId) {
+    if (!productId) {
       return NextResponse.json(
-        { error: 'Course ID is required' },
+        { error: 'Product ID is required' },
         { status: 400 }
       );
     }
 
-    // Get course from database
-    const course = await prisma.course.findUnique({
+    // Get product from database
+    const product = await prisma.product.findUnique({
       where: {
-        id: courseId,
+        id: productId,
       },
     });
 
-    if (!course) {
+    if (!product) {
       return NextResponse.json(
-        { error: 'Course not found' },
+        { error: 'Product not found' },
         { status: 404 }
       );
     }
 
-    // Check if user already purchased the course
+    // Check if user already purchased the product
     const existingPurchase = await prisma.purchase.findFirst({
       where: {
         userId: session.user.id,
-        courseId: course.id,
+        productId: product.id,
         status: 'completed',
       },
     });
 
     if (existingPurchase) {
       return NextResponse.json(
-        { error: 'You have already purchased this course' },
+        { error: 'You have already purchased this PDF' },
         { status: 400 }
       );
     }
@@ -66,19 +66,19 @@ export async function POST(req: Request) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: course.title,
-              description: course.description,
+              name: product.title,
+              description: product.description,
             },
-            unit_amount: Math.round(course.price * 100), // Convert to cents
+            unit_amount: Math.round(product.price * 100), // Convert to cents
           },
           quantity: 1,
         },
       ],
       mode: 'payment',
       success_url: `${process.env.NEXTAUTH_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/courses/${course.id}`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/products/${product.id}`,
       metadata: {
-        courseId: course.id,
+        productId: product.id,
         userId: session.user.id,
       },
     });
@@ -87,8 +87,8 @@ export async function POST(req: Request) {
     await prisma.purchase.create({
       data: {
         userId: session.user.id,
-        courseId: course.id,
-        amount: course.price,
+        productId: product.id,
+        amount: product.price,
         status: 'pending',
       },
     });

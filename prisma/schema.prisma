@@ -29,7 +29,6 @@ model User {
   accounts      Account[]
   sessions      Session[]
   purchases     Purchase[]
-  reviews       Review[]
 }
 
 // NextAuth models
@@ -68,77 +67,35 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Course models
-model Course {
+// PDF Product model
+model Product {
   id          String   @id @default(cuid())
   title       String
   description String   @db.Text
   price       Float
   imageUrl    String?
+  pdfUrl      String   // Path to the PDF file
   featured    Boolean  @default(false)
-  published   Boolean  @default(false)
+  published   Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
-  sections    Section[]
   purchases   Purchase[]
-  reviews     Review[]
-}
-
-model Section {
-  id        String   @id @default(cuid())
-  title     String
-  order     Int
-  courseId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  course    Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  lessons   Lesson[]
-}
-
-model Lesson {
-  id        String   @id @default(cuid())
-  title     String
-  content   String   @db.Text
-  videoUrl  String?
-  order     Int
-  sectionId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  section   Section   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
 }
 
 model Purchase {
-  id        String   @id @default(cuid())
-  userId    String
-  courseId  String
-  amount    Float
-  status    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  userId     String
+  productId  String
+  amount     Float
+  status     String   // 'pending', 'completed', 'failed'
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // Relations
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-}
-
-model Review {
-  id        String   @id @default(cuid())
-  rating    Int
-  comment   String?  @db.Text
-  userId    String
-  courseId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 enum Role {
