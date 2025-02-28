@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { headers } from 'next/headers';
 import prisma from '@/lib/prisma';
-
-// Initialize Stripe with a simpler approach
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
+import type { Stripe as StripeType } from 'stripe';
 
 export async function POST(req: Request) {
   try {
+    // Import Stripe dynamically
+    const { default: Stripe } = await import('stripe');
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
+    
     const body = await req.text();
     const headersList = await headers();
     const signature = headersList.get('stripe-signature');
@@ -30,7 +31,7 @@ export async function POST(req: Request) {
     // Handle the event
     switch (event.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
+        const session = event.data.object as StripeType.Checkout.Session;
         const productId = session.metadata?.productId;
         const userId = session.metadata?.userId;
 
@@ -50,7 +51,7 @@ export async function POST(req: Request) {
         break;
       }
       case 'checkout.session.expired': {
-        const session = event.data.object as Stripe.Checkout.Session;
+        const session = event.data.object as StripeType.Checkout.Session;
         const productId = session.metadata?.productId;
         const userId = session.metadata?.userId;
 

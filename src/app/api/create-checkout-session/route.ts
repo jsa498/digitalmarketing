@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/lib/prisma';
 
-// Initialize Stripe with a simpler approach
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
-
 export async function POST(req: Request) {
   try {
+    // Import Stripe dynamically
+    const { default: Stripe } = await import('stripe');
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
+    
     const session = await getServerSession(authOptions);
     
     if (!session?.user) {
