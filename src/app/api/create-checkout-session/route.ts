@@ -4,8 +4,11 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/lib/prisma';
 
-// Initialize Stripe without specifying the API version
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+// Initialize Stripe with explicit API key string
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
+const stripe = new Stripe(stripeSecretKey, {
+  apiVersion: '2025-02-24.acacia', // Using the latest supported version
+});
 
 export async function POST(req: Request) {
   try {
