@@ -3,12 +3,9 @@ import Stripe from 'stripe';
 import { headers } from 'next/headers';
 import prisma from '@/lib/prisma';
 
-// Initialize Stripe with explicit API key string
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
-const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: '2025-02-24.acacia', // Using the latest supported version
-});
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
+// Initialize Stripe with a simpler approach
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
 
 export async function POST(req: Request) {
   try {
