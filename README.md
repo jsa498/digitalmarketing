@@ -1,15 +1,14 @@
-# Digital Marketing Courses Platform
+# Digital Marketing Resources Platform
 
-A Next.js application for selling digital marketing courses online. This platform allows users to browse courses, make purchases using Stripe, and access course content after purchase.
+A Next.js application for selling digital marketing resources and PDFs online. This platform allows users to browse products, make purchases using Stripe, and access PDF content after purchase.
 
 ## Features
 
-- **User Authentication**: Sign up, sign in, and user profiles
-- **Course Catalog**: Browse and search for digital marketing courses
-- **Course Details**: View detailed information about each course
-- **Secure Payments**: Purchase courses using Stripe
-- **User Dashboard**: Access purchased courses and track progress
-- **Admin Panel**: Manage courses, users, and sales
+- **Product Catalog**: Browse and search for digital marketing PDFs and resources
+- **Product Details**: View detailed information about each product
+- **Secure Payments**: Purchase products using Stripe
+- **User Dashboard**: Access purchased PDFs and resources
+- **Admin Panel**: Manage products, users, and sales
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
 
 ## Tech Stack
@@ -19,21 +18,20 @@ A Next.js application for selling digital marketing courses online. This platfor
 - **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: NextAuth.js
 - **Payments**: Stripe
-- **Styling**: Tailwind CSS
 
-## Getting Started
+## Installation
 
 ### Prerequisites
 
-- Node.js 18+ and npm
+- Node.js (v18 or later)
 - PostgreSQL database
-- Stripe account for payment processing
+- Stripe account
 
-### Installation
+### Setup
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/digitalmarketing.git
+   git clone https://github.com/jsa498/digitalmarketing.git
    cd digitalmarketing
    ```
 
@@ -46,25 +44,22 @@ A Next.js application for selling digital marketing courses online. This platfor
    Create a `.env` file in the root directory with the following variables:
    ```
    # Database
-   DATABASE_URL="postgresql://username:password@localhost:5432/digitalmarketing?schema=public"
+   DATABASE_URL="postgresql://username:password@localhost:5432/digitalmarketing"
 
    # NextAuth
    NEXTAUTH_URL="http://localhost:3000"
-   NEXTAUTH_SECRET="your-nextauth-secret-key"
-
-   # Google OAuth (optional)
-   GOOGLE_CLIENT_ID="your-google-client-id"
-   GOOGLE_CLIENT_SECRET="your-google-client-secret"
+   NEXTAUTH_SECRET="your-nextauth-secret"
 
    # Stripe
-   STRIPE_PUBLIC_KEY="your-stripe-public-key"
-   STRIPE_SECRET_KEY="your-stripe-secret-key"
-   STRIPE_WEBHOOK_SECRET="your-stripe-webhook-secret"
+   STRIPE_SECRET_KEY="sk_test_your_stripe_secret_key"
+   STRIPE_WEBHOOK_SECRET="whsec_your_stripe_webhook_secret"
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_your_stripe_publishable_key"
    ```
 
 4. Set up the database:
    ```bash
-   npx prisma migrate dev --name init
+   npx prisma migrate dev
+   npx prisma db seed
    ```
 
 5. Start the development server:
@@ -72,63 +67,52 @@ A Next.js application for selling digital marketing courses online. This platfor
    npm run dev
    ```
 
-6. Open [http://localhost:3000](http://localhost:3000) in your browser.
+## Deployment on Vercel
 
-### Setting up Stripe Webhooks
+### Setting up Environment Variables in Vercel
 
-To handle Stripe webhook events (payment confirmations, etc.), you need to set up a webhook endpoint:
+1. Create a new project in Vercel and connect it to your GitHub repository.
 
-1. Install the Stripe CLI: [https://stripe.com/docs/stripe-cli](https://stripe.com/docs/stripe-cli)
-2. Login to your Stripe account:
-   ```bash
-   stripe login
-   ```
-3. Forward webhook events to your local server:
-   ```bash
-   stripe listen --forward-to localhost:3000/api/webhook
-   ```
-4. Copy the webhook signing secret and add it to your `.env` file as `STRIPE_WEBHOOK_SECRET`.
+2. In the Vercel dashboard, go to your project settings and navigate to the "Environment Variables" tab.
 
-## Deployment
+3. Add the following environment variables:
+   - `DATABASE_URL`: Your PostgreSQL connection string (use a production database)
+   - `NEXTAUTH_URL`: Your production URL (e.g., https://your-domain.vercel.app)
+   - `NEXTAUTH_SECRET`: A secure random string for NextAuth
+   - `STRIPE_SECRET_KEY`: Your Stripe secret key
+   - `STRIPE_WEBHOOK_SECRET`: Your Stripe webhook secret
+   - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`: Your Stripe publishable key
 
-### Deploy to Vercel
+4. Deploy your project.
 
-The easiest way to deploy this application is using Vercel:
+### Setting up a Production Database
 
-1. Push your code to a GitHub repository
-2. Import the project in Vercel
-3. Configure the environment variables
-4. Deploy
+For production, you can use:
+- [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres)
+- [Supabase](https://supabase.com/)
+- [Railway](https://railway.app/)
+- [Neon](https://neon.tech/)
 
-### Database Setup for Production
+After setting up your production database, update the `DATABASE_URL` environment variable in Vercel.
 
-1. Set up a PostgreSQL database (e.g., using Supabase, Railway, or any other provider)
-2. Update the `DATABASE_URL` in your environment variables
-3. Run the migrations:
-   ```bash
-   npx prisma migrate deploy
-   ```
+### Setting up Stripe Webhooks for Production
+
+1. In your Stripe dashboard, go to Developers > Webhooks.
+2. Click "Add endpoint" and enter your webhook URL: `https://your-domain.vercel.app/api/webhook`.
+3. Select the events to listen for (at minimum: `checkout.session.completed` and `checkout.session.expired`).
+4. Copy the signing secret and add it as the `STRIPE_WEBHOOK_SECRET` environment variable in Vercel.
 
 ## Project Structure
 
-- `/src/app`: Next.js App Router pages and API routes
+- `/prisma`: Database schema and migrations
+- `/public`: Static assets and PDF files
+- `/src/app`: Next.js app router pages and API routes
 - `/src/components`: Reusable React components
 - `/src/lib`: Utility functions and shared code
-- `/src/hooks`: Custom React hooks
-- `/prisma`: Prisma schema and migrations
-
-## Contributing
-
-1. Fork the repository
-2. Create a new branch: `git checkout -b feature/your-feature-name`
-3. Make your changes
-4. Commit your changes: `git commit -m 'Add some feature'`
-5. Push to the branch: `git push origin feature/your-feature-name`
-6. Submit a pull request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License.
 
 ## Acknowledgements
 
