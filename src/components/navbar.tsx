@@ -1,8 +1,26 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ThemeToggle } from './ui/theme-toggle';
 import { useSession, signOut } from 'next-auth/react';
+import { Menu } from 'lucide-react';
+import { Button } from './ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // Extend the Session type to include role
 interface ExtendedUser {
@@ -14,100 +32,172 @@ interface ExtendedUser {
 
 export const Navbar = () => {
   const pathname = usePathname();
-  const { data: session, status } = useSession();
-  const user = session?.user as ExtendedUser | undefined;
-  const isAdmin = user?.role === 'ADMIN';
-  const isAuthenticated = status === 'authenticated';
+  const { data: session } = useSession();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return 'U';
+    return name.split(' ').map(part => part[0]).join('').toUpperCase().substring(0, 2);
+  };
 
   return (
-    <nav className="bg-white shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <Link href="/" className="text-xl font-bold text-indigo-600">
-                DigitalMarketing
-              </Link>
-            </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link
-                href="/"
-                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                  pathname === '/'
-                    ? 'border-indigo-500 text-gray-900'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                }`}
-              >
-                Home
-              </Link>
-              <Link
-                href="/products"
-                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                  pathname === '/products' || pathname.startsWith('/products/')
-                    ? 'border-indigo-500 text-gray-900'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                }`}
-              >
-                Products
-              </Link>
-              {isAuthenticated && (
-                <Link
-                  href="/dashboard"
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                    pathname === '/dashboard' || pathname.startsWith('/dashboard/')
-                      ? 'border-indigo-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                  }`}
-                >
-                  Dashboard
-                </Link>
-              )}
-              {isAdmin && (
-                <Link
-                  href="/admin"
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                    pathname === '/admin' || pathname.startsWith('/admin/')
-                      ? 'border-indigo-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                  }`}
-                >
-                  Admin
-                </Link>
-              )}
-            </div>
+    <div className="flex justify-center sticky top-4 z-50 pointer-events-none">
+      <div className="bg-muted backdrop-blur-lg rounded-full px-4 py-2 shadow-lg pointer-events-auto inline-flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <Link href="/" className="font-bold text-lg hover:opacity-80 transition-opacity">
+            Digital Marketing
+          </Link>
+          
+          {/* Desktop navigation */}
+          <div className="hidden md:flex items-center gap-4">
+            <Link 
+              href="/" 
+              className={`px-4 py-2 transition-colors hover:text-primary ${
+                pathname === '/' ? 'text-primary font-medium' : 'text-muted-foreground'
+              }`}
+            >
+              Home
+            </Link>
+            <Link 
+              href="/products" 
+              className={`px-4 py-2 transition-colors hover:text-primary ${
+                pathname === '/products' ? 'text-primary font-medium' : 'text-muted-foreground'
+              }`}
+            >
+              Products
+            </Link>
+            <Link 
+              href="/courses" 
+              className={`px-4 py-2 transition-colors hover:text-primary ${
+                pathname === '/courses' ? 'text-primary font-medium' : 'text-muted-foreground'
+              }`}
+            >
+              Courses
+            </Link>
           </div>
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
-            {isAuthenticated ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-700">
-                  {user?.name || user?.email}
-                </span>
-                <button
-                  onClick={() => signOut()}
-                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Sign out
-                </button>
-              </div>
+        </div>
+        
+        {/* Right side: theme toggle and auth */}
+        <div className="flex items-center gap-4">
+          <ThemeToggle />
+          
+          {/* Desktop auth */}
+          <div className="hidden md:flex items-center">
+            {session ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={session.user?.image || ''} alt={session.user?.name || 'User'} />
+                      <AvatarFallback>{getInitials(session.user?.name)}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{session.user?.name}</p>
+                      <p className="text-xs leading-none text-muted-foreground">{session.user?.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard">Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
-              <div className="flex items-center space-x-4">
-                <Link
-                  href="/api/auth/signin"
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href="/api/auth/signin"
-                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  Sign up
-                </Link>
-              </div>
+              <Button asChild variant="secondary" className="rounded-full">
+                <Link href="/signin">Sign in</Link>
+              </Button>
             )}
+          </div>
+          
+          {/* Mobile menu */}
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right">
+                <div className="flex flex-col gap-4 py-4">
+                  <Link 
+                    href="/"
+                    className={`px-4 py-2 text-sm font-medium rounded-full ${
+                      pathname === '/' ? 'bg-background' : ''
+                    }`}
+                  >
+                    Home
+                  </Link>
+                  <Link 
+                    href="/products"
+                    className={`px-4 py-2 text-sm font-medium rounded-full ${
+                      pathname === '/products' ? 'bg-background' : ''
+                    }`}
+                  >
+                    Products
+                  </Link>
+                  <Link 
+                    href="/courses"
+                    className={`px-4 py-2 text-sm font-medium rounded-full ${
+                      pathname === '/courses' ? 'bg-background' : ''
+                    }`}
+                  >
+                    Courses
+                  </Link>
+                  
+                  <div className="px-4 py-2 mt-4 border-t">
+                    {session ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={session.user?.image || ''} alt={session.user?.name || 'User'} />
+                            <AvatarFallback>{getInitials(session.user?.name)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">{session.user?.name}</p>
+                            <p className="text-xs text-muted-foreground">{session.user?.email}</p>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Button variant="outline" asChild className="w-full rounded-full">
+                            <Link href="/dashboard">Dashboard</Link>
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            onClick={() => signOut()}
+                            className="w-full rounded-full"
+                          >
+                            Sign out
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button asChild className="w-full rounded-full">
+                        <Link href="/signin">Sign in</Link>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
-    </nav>
+    </div>
   );
 }; 
