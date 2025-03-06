@@ -61,13 +61,13 @@ export default async function Dashboard() {
             </p>
           </CardContent>
           <CardFooter className="flex flex-col sm:flex-row gap-4">
-            <Button asChild className="w-full sm:w-auto">
+            <Button asChild className="w-full sm:w-auto hover:text-primary-foreground">
               <Link href="/products" className="inline-flex items-center gap-2">
                 <ShoppingBasket className="h-4 w-4" />
                 Browse Products
               </Link>
             </Button>
-            <Button asChild variant="outline" className="w-full sm:w-auto">
+            <Button asChild variant="outline" className="w-full sm:w-auto hover:text-accent-foreground">
               <Link href="/courses" className="inline-flex items-center gap-2">
                 <BookOpen className="h-4 w-4" />
                 Browse Courses
@@ -97,14 +97,14 @@ export default async function Dashboard() {
                 </CardDescription>
               </CardHeader>
               <CardFooter className="p-5 pt-0 flex justify-between">
-                <Button asChild size="sm" variant="outline" className="gap-2">
+                <Button asChild size="sm" variant="outline" className="gap-2 hover:text-accent-foreground">
                   <a href={purchase.product.pdfUrl} target="_blank" rel="noopener noreferrer">
                     <Download className="h-4 w-4" />
                     Download PDF
                   </a>
                 </Button>
                 
-                <Button asChild size="sm" variant="ghost" className="gap-1">
+                <Button asChild size="sm" variant="ghost" className="gap-1 hover:text-accent-foreground">
                   <Link href={`/products/${purchase.product.id}`}>
                     View Details <ArrowRight className="h-3 w-3" />
                   </Link>
@@ -117,13 +117,13 @@ export default async function Dashboard() {
       
       {purchases.length > 0 && (
         <div className="mt-12 flex justify-center space-x-4">
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="hover:text-accent-foreground">
             <Link href="/products" className="inline-flex items-center gap-2">
               <ShoppingBasket className="h-4 w-4" />
               Browse More Products
             </Link>
           </Button>
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="hover:text-accent-foreground">
             <Link href="/courses" className="inline-flex items-center gap-2">
               <BookOpen className="h-4 w-4" />
               Browse Courses

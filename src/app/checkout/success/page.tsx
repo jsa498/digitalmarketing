@@ -1,56 +1,72 @@
+'use client';
+
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { Check } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCartStore } from '@/lib/store/cart-store';
+import { Button } from '@/components/ui/button';
 
 export default function CheckoutSuccessPage() {
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get('session_id');
+  const { clearCart } = useCartStore();
+  const router = useRouter();
+  
+  // Clear the cart on successful checkout
+  useEffect(() => {
+    if (sessionId) {
+      clearCart();
+    } else {
+      // If no session ID is present, redirect to home
+      router.push('/');
+    }
+  }, [sessionId, clearCart, router]);
+
   return (
-    <div className="bg-gray-50 min-h-screen py-16">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <div className="mb-6">
-            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100">
-              <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
+    <div className="container mx-auto py-16 px-4">
+      <div className="max-w-2xl mx-auto bg-card border border-border rounded-xl shadow-lg overflow-hidden">
+        <div className="p-8 flex flex-col items-center text-center">
+          <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+            <Check className="h-10 w-10 text-primary" />
           </div>
-          <h1 className="text-3xl font-extrabold text-gray-900 mb-4">Payment Successful!</h1>
-          <p className="text-lg text-gray-600 mb-8">
-            Thank you for your purchase. You now have access to the product.
+          
+          <h1 className="text-3xl font-bold mb-4">Payment Successful!</h1>
+          <p className="text-muted-foreground mb-8 max-w-md">
+            Thank you for your purchase. Your order has been processed successfully, and you now have access to your digital products.
           </p>
-          <div className="bg-gray-50 p-6 rounded-lg mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Details</h2>
-            <div className="flex justify-between mb-2">
-              <span className="text-gray-600">Product:</span>
-              <span className="font-medium text-gray-900">Digital Marketing Resource</span>
-            </div>
-            <div className="flex justify-between mb-2">
-              <span className="text-gray-600">Amount:</span>
-              <span className="font-medium">$99.99</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Order ID:</span>
-              <span className="font-medium">ORD-{Math.floor(Math.random() * 1000000)}</span>
+          
+          <div className="bg-accent/40 w-full p-6 rounded-lg mb-8">
+            <h2 className="text-xl font-semibold mb-4">Order Details</h2>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between py-1 border-b border-border/40">
+                <span className="text-muted-foreground">Product:</span>
+                <span className="font-medium">Digital Marketing Resource</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-border/40">
+                <span className="text-muted-foreground">Order ID:</span>
+                <span className="font-medium text-xs">#{sessionId?.slice(-8).toUpperCase() || '00000000'}</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span className="text-muted-foreground">Status:</span>
+                <span className="font-medium text-green-500">Completed</span>
+              </div>
             </div>
           </div>
-          <div className="space-y-4">
-            <Link
-              href="/dashboard"
-              className="block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded"
-            >
-              Go to Dashboard
-            </Link>
-            <Link
-              href="/products"
-              className="block w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-3 px-4 rounded"
-            >
-              Browse More Products
-            </Link>
+          
+          <div className="flex flex-col sm:flex-row gap-4 w-full">
+            <Button asChild className="flex-1">
+              <Link href="/dashboard">Go to Dashboard</Link>
+            </Button>
+            <Button asChild variant="outline" className="flex-1">
+              <Link href="/courses">Browse More Products</Link>
+            </Button>
           </div>
-          <div className="mt-8 text-sm text-gray-500">
-            <p>
-              A confirmation email has been sent to your email address.
-              If you have any questions, please contact our support team.
-            </p>
-          </div>
+          
+          <p className="text-xs text-muted-foreground mt-8">
+            A confirmation email has been sent to your email address.
+            If you have any questions, please contact our support team.
+          </p>
         </div>
       </div>
     </div>

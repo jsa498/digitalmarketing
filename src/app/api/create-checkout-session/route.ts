@@ -13,85 +13,102 @@ export async function POST(req: Request) {
     
     if (!session?.user) {
       return NextResponse.json(
-        { error: 'You must be logged in to purchase a PDF' },
+        { error: 'You must be logged in to purchase products' },
         { status: 401 }
       );
     }
 
     const body = await req.json();
-    const { productId } = body;
+    const { items } = body;
 
-    if (!productId) {
+    if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { error: 'Product ID is required' },
+        { error: 'At least one product is required' },
         { status: 400 }
       );
     }
 
-    // Get product from database
-    const product = await prisma.product.findUnique({
+    // Get all products from database
+    const productIds = items.map(item => item.id);
+    const products = await prisma.product.findMany({
       where: {
-        id: productId,
-      },
+        id: {
+          in: productIds
+        }
+      }
     });
 
-    if (!product) {
+    if (products.length === 0) {
       return NextResponse.json(
-        { error: 'Product not found' },
+        { error: 'No valid products found' },
         { status: 404 }
       );
     }
 
-    // Check if user already purchased the product
-    const existingPurchase = await prisma.purchase.findFirst({
+    // Check for already purchased products
+    const existingPurchases = await prisma.purchase.findMany({
       where: {
         userId: session.user.id,
-        productId: product.id,
+        productId: {
+          in: productIds
+        },
         status: 'completed',
       },
     });
 
-    if (existingPurchase) {
+    const alreadyPurchasedIds = existingPurchases.map(p => p.productId);
+    
+    // Filter out already purchased products
+    const productsToPurchase = products.filter(p => !alreadyPurchasedIds.includes(p.id));
+    
+    if (productsToPurchase.length === 0) {
       return NextResponse.json(
-        { error: 'You have already purchased this PDF' },
+        { error: 'All products have already been purchased' },
         { status: 400 }
       );
     }
 
+    // Prepare line items for Stripe
+    const lineItems = productsToPurchase.map(product => ({
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: product.title,
+          description: product.description,
+          images: product.imageUrl ? [product.imageUrl] : [],
+        },
+        unit_amount: Math.round(product.price * 100), // Convert to cents
+      },
+      quantity: 1,
+    }));
+
     // Create Stripe checkout session
     const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: product.title,
-              description: product.description,
-            },
-            unit_amount: Math.round(product.price * 100), // Convert to cents
-          },
-          quantity: 1,
-        },
-      ],
+      line_items: lineItems,
       mode: 'payment',
       success_url: `${process.env.NEXTAUTH_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/products/${product.id}`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/checkout`,
       metadata: {
-        productId: product.id,
+        // Store product IDs as comma-separated string in metadata
+        productIds: productsToPurchase.map(p => p.id).join(','),
         userId: session.user.id,
       },
     });
 
-    // Create a pending purchase record
-    await prisma.purchase.create({
-      data: {
-        userId: session.user.id,
-        productId: product.id,
-        amount: product.price,
-        status: 'pending',
-      },
-    });
+    // Create pending purchase records for each product
+    await Promise.all(
+      productsToPurchase.map(product => 
+        prisma.purchase.create({
+          data: {
+            userId: session.user.id,
+            productId: product.id,
+            amount: product.price,
+            status: 'pending',
+          },
+        })
+      )
+    );
 
     return NextResponse.json({ sessionId: stripeSession.id });
   } catch (error) {

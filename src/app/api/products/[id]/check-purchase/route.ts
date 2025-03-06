@@ -2,10 +2,17 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/lib/prisma';
+import { NextRequest } from 'next/server';
+
+type Params = {
+  params: {
+    id: string;
+  };
+};
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: Params
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -17,11 +24,13 @@ export async function GET(
       );
     }
 
+    const id = params.id;
+
     // Check if user has purchased the product
     const purchase = await prisma.purchase.findFirst({
       where: {
         userId: session.user.id,
-        productId: params.id,
+        productId: id,
         status: 'completed',
       },
     });
