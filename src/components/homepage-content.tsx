@@ -106,7 +106,7 @@ export default function HomePageContent({ featuredProducts, courses }: {
                   {courses.map((product) => (
                     <div 
                       key={product.id}
-                      className="group relative bg-card hover:bg-card/80 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 flex-shrink-0 w-80 border border-border/40"
+                      className="group relative bg-card hover:bg-card/80 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 flex-shrink-0 w-80"
                     >
                       <div className="relative h-52 w-full overflow-hidden">
                         {product.imageUrl ? (
@@ -155,11 +155,6 @@ export default function HomePageContent({ featuredProducts, courses }: {
                   ))}
                 </div>
               </div>
-              
-              {/* Gradient indicator to show more content is available */}
-              {courses.length > 3 && (
-                <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-background to-transparent pointer-events-none"></div>
-              )}
             </div>
           </div>
         </div>
