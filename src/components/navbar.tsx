@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ThemeToggle } from './ui/theme-toggle';
 import { useSession, signOut } from 'next-auth/react';
-import { Menu } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import CartDropdown from './cart/cart-dropdown';
+import CartModal from './cart/cart-modal';
 import {
   Sheet,
   SheetContent,
@@ -35,6 +35,12 @@ export const Navbar = () => {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [mounted, setMounted] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Close sheet when pathname changes (navigation occurs)
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     setMounted(true);
@@ -88,8 +94,8 @@ export const Navbar = () => {
         
         {/* Right side: theme toggle and auth */}
         <div className="flex items-center gap-4">
-          {/* Cart Dropdown */}
-          <CartDropdown />
+          {/* Cart Modal */}
+          <CartModal />
           
           <ThemeToggle />
           
@@ -130,71 +136,114 @@ export const Navbar = () => {
           
           {/* Mobile menu */}
           <div className="md:hidden">
-            <Sheet>
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="rounded-full relative p-2 hover:bg-muted transition-colors"
+                  // Increase tap target while keeping visual size
+                  style={{ touchAction: 'manipulation' }}
+                >
+                  <div className="absolute inset-0" /> {/* Invisible touch target extender */}
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right">
-                <div className="flex flex-col gap-4 py-4">
-                  <Link 
-                    href="/"
-                    className={`px-4 py-2 text-sm font-medium rounded-full ${
-                      pathname === '/' ? 'bg-background' : ''
-                    }`}
-                  >
-                    Home
-                  </Link>
-                  <Link 
-                    href="/products"
-                    className={`px-4 py-2 text-sm font-medium rounded-full ${
-                      pathname === '/products' ? 'bg-background' : ''
-                    }`}
-                  >
-                    Products
-                  </Link>
-                  <Link 
-                    href="/courses"
-                    className={`px-4 py-2 text-sm font-medium rounded-full ${
-                      pathname === '/courses' ? 'bg-background' : ''
-                    }`}
-                  >
-                    Courses
-                  </Link>
-                  
-                  <div className="px-4 py-2 mt-4 border-t">
-                    {session ? (
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={session.user?.image || ''} alt={session.user?.name || 'User'} />
-                            <AvatarFallback>{getInitials(session.user?.name)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-sm font-medium">{session.user?.name}</p>
-                            <p className="text-xs text-muted-foreground">{session.user?.email}</p>
+              <SheetContent 
+                side="right"
+                className="w-full sm:w-80 p-0" // Remove default padding for custom control
+              >
+                <div className="flex flex-col h-full">
+                  {/* Header with larger close target */}
+                  <div className="p-4 flex justify-end">
+                    <Button
+                      variant="ghost"
+                      className="h-10 w-10 p-0 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <X className="h-5 w-5 text-black dark:text-white" />
+                      <span className="sr-only">Close</span>
+                    </Button>
+                  </div>
+
+                  {/* Navigation links with larger touch targets */}
+                  <div className="flex-1 overflow-auto px-4 pb-6">
+                    <nav className="space-y-2">
+                      <Link 
+                        href="/"
+                        className={`flex items-center min-h-[48px] px-4 rounded-xl text-base font-medium transition-all hover:bg-muted/50 active:bg-muted ${
+                          pathname === '/' ? 'bg-muted text-primary' : 'text-foreground'
+                        }`}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Home
+                      </Link>
+                      <Link 
+                        href="/products"
+                        className={`flex items-center min-h-[48px] px-4 rounded-xl text-base font-medium transition-all hover:bg-muted/50 active:bg-muted ${
+                          pathname === '/products' ? 'bg-muted text-primary' : 'text-foreground'
+                        }`}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Products
+                      </Link>
+                      <Link 
+                        href="/courses"
+                        className={`flex items-center min-h-[48px] px-4 rounded-xl text-base font-medium transition-all hover:bg-muted/50 active:bg-muted ${
+                          pathname === '/courses' ? 'bg-muted text-primary' : 'text-foreground'
+                        }`}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Courses
+                      </Link>
+                    </nav>
+
+                    {/* User section with improved spacing and touch targets */}
+                    <div className="mt-6 pt-6 border-t border-border">
+                      {session ? (
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-3 px-4 py-2">
+                            <Avatar className="h-10 w-10"> {/* Slightly larger avatar */}
+                              <AvatarImage src={session.user?.image || ''} alt={session.user?.name || 'User'} />
+                              <AvatarFallback>{getInitials(session.user?.name)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0"> {/* Prevent text overflow */}
+                              <p className="text-sm font-medium truncate">{session.user?.name}</p>
+                              <p className="text-xs text-muted-foreground truncate">{session.user?.email}</p>
+                            </div>
+                          </div>
+                          <div className="space-y-2 px-4">
+                            <Button 
+                              variant="outline" 
+                              asChild 
+                              className="w-full h-12 rounded-xl justify-start text-base font-medium"
+                            >
+                              <Link href="/dashboard">Dashboard</Link>
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => {
+                                setIsOpen(false);
+                                signOut();
+                              }}
+                              className="w-full h-12 rounded-xl justify-start text-base font-medium text-foreground dark:text-foreground hover:text-foreground"
+                            >
+                              Sign out
+                            </Button>
                           </div>
                         </div>
-                        <div className="space-y-2">
-                          <Button variant="outline" asChild className="w-full rounded-full">
-                            <Link href="/dashboard">Dashboard</Link>
-                          </Button>
+                      ) : (
+                        <div className="px-4">
                           <Button 
-                            variant="outline" 
-                            onClick={() => signOut()}
-                            className="w-full rounded-full"
+                            asChild 
+                            className="w-full h-12 rounded-xl text-base font-medium"
                           >
-                            Sign out
+                            <Link href="/signin">Sign in</Link>
                           </Button>
                         </div>
-                      </div>
-                    ) : (
-                      <Button asChild className="w-full rounded-full">
-                        <Link href="/signin">Sign in</Link>
-                      </Button>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               </SheetContent>

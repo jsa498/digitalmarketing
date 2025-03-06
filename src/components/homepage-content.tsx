@@ -46,28 +46,29 @@ export default function HomePageContent({ featuredProducts, courses }: {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative z-10 py-20 md:py-28 lg:py-32">
             <div className="text-center max-w-4xl mx-auto">
-              <h1 className="text-6xl md:text-7xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-foreground mb-8">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-4">
                 DevFlow
-                <br />
-                Resources & Tools
               </h1>
-              <p className="mt-6 text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-8 text-foreground">
+                Resources & Tools
+              </h2>
+              <p className="mt-6 text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-4">
                 Helping you navigate the landscape with professional resources, tools, and guidance for your marketing journey.
               </p>
-              <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="mt-10 flex flex-row gap-4 justify-center px-4">
                 <RainbowButton
-                  href="/courses"
+                  href="/products"
                   variant="dark"
-                  className="text-lg px-8 py-6 rounded-xl transition-transform hover:scale-105"
+                  className="flex-1 max-w-[200px] text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 rounded-xl transition-transform hover:scale-105"
                 >
                   View Products
                 </RainbowButton>
                 <RainbowButton
                   href="/courses"
                   variant="light"
-                  className="text-lg px-8 py-6 rounded-xl transition-transform hover:scale-105"
+                  className="flex-1 max-w-[200px] text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 rounded-xl transition-transform hover:scale-105 whitespace-nowrap"
                 >
-                  Browse Resources
+                  Browse Courses
                 </RainbowButton>
               </div>
               
