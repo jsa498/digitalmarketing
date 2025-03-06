@@ -47,12 +47,12 @@ export default function HomePageContent({ featuredProducts, courses }: {
           <div className="relative z-10 py-20 md:py-28 lg:py-32">
             <div className="text-center max-w-4xl mx-auto">
               <h1 className="text-6xl md:text-7xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-foreground mb-8">
-                Digital Marketing
+                DevFlow
                 <br />
                 Resources & Tools
               </h1>
               <p className="mt-6 text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Helping you navigate the digital landscape with professional resources, tools, and guidance for your marketing journey.
+                Helping you navigate the landscape with professional resources, tools, and guidance for your marketing journey.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
                 <RainbowButton
@@ -91,11 +91,11 @@ export default function HomePageContent({ featuredProducts, courses }: {
               <div className="absolute -top-10 w-24 h-24 bg-primary/5 rounded-full blur-xl"></div>
               <span className="relative z-10 text-sm font-medium px-4 py-1.5 rounded-full bg-primary/10 text-primary mb-4">FEATURED</span>
               <h2 className="text-4xl md:text-5xl font-bold text-center max-w-3xl leading-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-foreground">
-                Top Digital Marketing Resources
+                Top Marketing Resources
               </h2>
               <div className="w-20 h-1 bg-gradient-to-r from-primary/80 to-primary/20 rounded-full mt-6"></div>
               <p className="mt-6 text-xl text-muted-foreground max-w-2xl text-center mx-auto">
-                Our most popular tools and resources to help you succeed in your digital marketing efforts.
+                Our most popular tools and resources to help you succeed in your marketing efforts.
               </p>
             </div>
 
@@ -174,7 +174,7 @@ export default function HomePageContent({ featuredProducts, courses }: {
               Why Choose Our Resources
             </p>
             <p className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto">
-              Our digital marketing tools and resources are designed to help you grow your online presence effectively.
+              Our marketing tools and resources are designed to help you grow your online presence effectively.
             </p>
           </div>
 
@@ -228,7 +228,7 @@ export default function HomePageContent({ featuredProducts, courses }: {
             <div className="flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="text-left max-w-xl">
                 <h2 className="text-4xl font-bold tracking-tight sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-foreground">
-                  Ready to level up your digital marketing?
+                  Ready to level up your marketing?
                 </h2>
                 <p className="mt-6 text-xl text-muted-foreground">
                   Explore our premium resources today and transform your online presence.

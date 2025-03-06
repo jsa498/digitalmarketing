@@ -54,7 +54,7 @@ export const Navbar = () => {
       <div className="bg-muted backdrop-blur-lg rounded-full px-4 py-2 shadow-lg pointer-events-auto inline-flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/" className="font-bold text-lg hover:opacity-80 transition-opacity">
-            Digital Marketing
+            DevFlow
           </Link>
           
           {/* Desktop navigation */}

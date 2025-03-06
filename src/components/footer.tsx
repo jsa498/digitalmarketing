@@ -39,7 +39,7 @@ export const Footer = () => {
           </a>
         </div>
         <p className="mt-8 text-center text-base text-muted-foreground">
-          &copy; {currentYear} Digital Marketing Resources. All rights reserved.
+          &copy; {currentYear} DevFlow. All rights reserved.
         </p>
       </div>
     </footer>
