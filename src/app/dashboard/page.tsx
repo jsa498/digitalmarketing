@@ -29,7 +29,15 @@ export default async function Dashboard() {
   });
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">My Digital Products</h1>
+        {session.user.role === "ADMIN" && (
+          <Button asChild variant="outline">
+            <Link href="/dashboard/admin">Admin Dashboard</Link>
+          </Button>
+        )}
+      </div>
       <div className="relative py-8 md:py-12 overflow-hidden mb-8">
         <div className="absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute -top-1/2 left-1/2 -translate-x-1/2 w-[800px] h-[800px] opacity-10 dark:opacity-5">
