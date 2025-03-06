@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ShoppingCart, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,12 +20,23 @@ export default function CartModal() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { items, removeItem, getItemCount, getTotalPrice, clearCart } = useCartStore();
+  const { items, removeItem, getItemCount, getTotalPrice, clearCart, syncWithSupabase } = useCartStore();
+  const { data: session } = useSession();
   
-  // Handle hydration mismatch
+  // Handle hydration mismatch and initialize Supabase sync
   useEffect(() => {
     setMounted(true);
-  }, []);
+    
+    // Initialize Supabase sync if user is logged in
+    if (session?.user?.id) {
+      syncWithSupabase(session.user.id).then(cleanup => {
+        // Return cleanup function to be called on unmount
+        return () => {
+          cleanup();
+        };
+      });
+    }
+  }, [session?.user?.id, syncWithSupabase]);
   
   if (!mounted) return null;
   
