@@ -7,12 +7,13 @@ interface RainbowButtonProps
   asChild?: boolean;
   href?: string;
   variant?: 'dark' | 'light';
+  forceWhiteText?: boolean;
 }
 
 export const RainbowButton = React.forwardRef<
   HTMLButtonElement,
   RainbowButtonProps
->(({ children, className, href, variant = 'dark', ...props }, ref) => {
+>(({ children, className, href, variant = 'dark', forceWhiteText = false, ...props }, ref) => {
   const buttonElement = (
     <button
       ref={ref}
@@ -23,7 +24,11 @@ export const RainbowButton = React.forwardRef<
         // dark variant (black button)
         variant === 'dark' && "bg-[linear-gradient(#121213,#121213),linear-gradient(#121213_50%,rgba(18,18,19,0.6)_80%,rgba(18,18,19,0)),linear-gradient(90deg,hsl(var(--color-1)),hsl(var(--color-5)),hsl(var(--color-3)),hsl(var(--color-4)),hsl(var(--color-2)))] text-white",
         // light variant (white button)
-        variant === 'light' && "bg-[linear-gradient(#fff,#fff),linear-gradient(#fff_50%,rgba(255,255,255,0.6)_80%,rgba(0,0,0,0)),linear-gradient(90deg,hsl(var(--color-1)),hsl(var(--color-5)),hsl(var(--color-3)),hsl(var(--color-4)),hsl(var(--color-2)))] text-black",
+        variant === 'light' && !forceWhiteText && "bg-[linear-gradient(#fff,#fff),linear-gradient(#fff_50%,rgba(255,255,255,0.6)_80%,rgba(0,0,0,0)),linear-gradient(90deg,hsl(var(--color-1)),hsl(var(--color-5)),hsl(var(--color-3)),hsl(var(--color-4)),hsl(var(--color-2)))] text-black",
+        // light variant with forced white text
+        variant === 'light' && forceWhiteText && "bg-[linear-gradient(#fff,#fff),linear-gradient(#fff_50%,rgba(255,255,255,0.6)_80%,rgba(0,0,0,0)),linear-gradient(90deg,hsl(var(--color-1)),hsl(var(--color-5)),hsl(var(--color-3)),hsl(var(--color-4)),hsl(var(--color-2)))] text-white",
+        // Force white text when specified
+        forceWhiteText && "!text-white",
         className,
       )}
       {...props}

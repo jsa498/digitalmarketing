@@ -71,11 +71,6 @@ export default async function CoursesPage() {
                       </svg>
                     </div>
                   )}
-                  <div className="absolute top-4 right-4 z-20">
-                    <span className="bg-primary/90 text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">
-                      ${product.price.toFixed(2)}
-                    </span>
-                  </div>
                 </div>
                 <div className="p-6">
                   <h2 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">

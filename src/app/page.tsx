@@ -2,14 +2,20 @@ import prisma from '@/lib/prisma';
 import HomePageContent from '../components/homepage-content';
 
 export default async function Home() {
-  // Get featured products
-  const featuredProducts = await prisma.product.findMany({
+  // Get all published courses for the homepage display
+  const courses = await prisma.product.findMany({
     where: {
-      featured: true,
       published: true,
     },
-    take: 3,
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
 
-  return <HomePageContent featuredProducts={featuredProducts} />;
+  console.log(`Fetched ${courses.length} courses for homepage display`);
+
+  // Pass all courses to the HomePageContent component
+  // We're using the same courses for both featuredProducts and courses props
+  // since we're displaying all courses in the featured section now
+  return <HomePageContent featuredProducts={courses} courses={courses} />;
 }

@@ -5,8 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { loadStripe } from '@stripe/stripe-js';
 import { RainbowButton } from '@/components/ui/rainbow-button';
-import { ArrowLeft, Bookmark, Check, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, Bookmark, Check, ShoppingCart, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
+import { useCartStore } from '@/lib/store/cart-store';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 // Initialize Stripe
 const stripePromise = loadStripe(
@@ -35,8 +38,14 @@ export default function CoursePage({ params }: { params: { id: string } }) {
   const [purchased, setPurchased] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { data: session } = useSession();
+  const { addItem, isItemInCart } = useCartStore();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     async function loadProduct() {
@@ -69,34 +78,56 @@ export default function CoursePage({ params }: { params: { id: string } }) {
     
     try {
       setCheckoutLoading(true);
-      const response = await fetch('/api/checkout', {
+      const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          productId: params.id,
+          items: [{ id: params.id }],
         }),
       });
       
-      const session = await response.json();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error creating checkout session');
+      }
+      
+      const data = await response.json();
       
       const stripe = await stripePromise;
       if (stripe) {
         const { error } = await stripe.redirectToCheckout({
-          sessionId: session.id,
+          sessionId: data.sessionId,
         });
         
         if (error) {
           console.error('Error redirecting to checkout:', error);
+          throw new Error(error.message);
         }
       }
     } catch (err) {
       console.error('Error during checkout:', err);
+      toast.error(err instanceof Error ? err.message : 'There was a problem processing your payment. Please try again.');
     } finally {
       setCheckoutLoading(false);
     }
   };
+  
+  const handleAddToCart = () => {
+    if (!product) return;
+    
+    addItem({
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      imageUrl: product.imageUrl,
+    });
+    
+    toast.success('Added to cart');
+  };
+  
+  const isInCart = mounted && product ? isItemInCart(product.id) : false;
 
   if (loading) {
     return (
@@ -136,15 +167,17 @@ export default function CoursePage({ params }: { params: { id: string } }) {
         </div>
         
         <div className="container relative z-10">
-          <div className="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto">
-            {/* Back button */}
+          {/* Back button - Better positioned and styled */}
+          <div className="max-w-6xl mx-auto">
             <Link 
               href="/courses" 
-              className="inline-flex items-center gap-2 mb-4 text-sm font-medium text-muted-foreground hover:text-primary transition-colors md:absolute md:top-0 md:left-4"
+              className="inline-flex items-center gap-2 px-4 py-2 mb-8 text-sm font-medium bg-background/80 backdrop-blur-sm border border-border rounded-full shadow-sm text-foreground hover:text-primary transition-colors"
             >
               <ArrowLeft className="h-4 w-4" /> Back to all courses
             </Link>
-            
+          </div>
+          
+          <div className="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto">
             {/* Product image */}
             <div className="w-full md:w-1/2 flex-shrink-0">
               {product.imageUrl ? (
@@ -193,6 +226,7 @@ export default function CoursePage({ params }: { params: { id: string } }) {
                       className="flex-1"
                       onClick={handleCheckout}
                       disabled={checkoutLoading}
+                      forceWhiteText={true}
                     >
                       {checkoutLoading ? (
                         <span className="flex items-center gap-2">
@@ -200,20 +234,27 @@ export default function CoursePage({ params }: { params: { id: string } }) {
                           Processing...
                         </span>
                       ) : (
-                        <span className="flex items-center gap-2">
+                        <span className="flex items-center gap-2 text-white">
                           <ShoppingCart className="h-5 w-5" /> Purchase Now
                         </span>
                       )}
                     </RainbowButton>
-                    <button 
-                      className="flex-1 inline-flex items-center justify-center gap-2 bg-muted hover:bg-muted/80 text-foreground px-6 py-3 rounded-full transition-colors"
-                      onClick={() => {
-                        // Function to save for later (could be implemented)
-                        alert('Save for later functionality would be implemented here');
-                      }}
+                    <Button 
+                      variant="outline"
+                      className="flex-1 inline-flex items-center justify-center gap-2 hover:bg-muted/80 text-foreground px-6 py-3 rounded-full transition-colors"
+                      onClick={handleAddToCart}
+                      disabled={isInCart}
                     >
-                      <Bookmark className="h-5 w-5" /> Save for Later
-                    </button>
+                      {isInCart ? (
+                        <span className="flex items-center gap-2">
+                          <Check className="h-5 w-5" /> Added to Cart
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-2">
+                          <ShoppingBag className="h-5 w-5" /> Add to Cart
+                        </span>
+                      )}
+                    </Button>
                   </>
                 )}
               </div>

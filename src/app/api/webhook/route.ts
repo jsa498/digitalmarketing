@@ -32,14 +32,19 @@ export async function POST(req: Request) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as StripeType.Checkout.Session;
-        const productId = session.metadata?.productId;
+        const productIds = session.metadata?.productIds;
         const userId = session.metadata?.userId;
 
-        if (productId && userId) {
-          // Update purchase status to completed
+        if (productIds && userId) {
+          // Handle multiple products (comma-separated IDs)
+          const productIdArray = productIds.split(',');
+          
+          // Update all purchases to completed
           await prisma.purchase.updateMany({
             where: {
-              productId,
+              productId: {
+                in: productIdArray
+              },
               userId,
               status: 'pending',
             },
@@ -52,14 +57,19 @@ export async function POST(req: Request) {
       }
       case 'checkout.session.expired': {
         const session = event.data.object as StripeType.Checkout.Session;
-        const productId = session.metadata?.productId;
+        const productIds = session.metadata?.productIds;
         const userId = session.metadata?.userId;
 
-        if (productId && userId) {
-          // Update purchase status to failed
+        if (productIds && userId) {
+          // Handle multiple products (comma-separated IDs)
+          const productIdArray = productIds.split(',');
+          
+          // Update all purchases to failed
           await prisma.purchase.updateMany({
             where: {
-              productId,
+              productId: {
+                in: productIdArray
+              },
               userId,
               status: 'pending',
             },

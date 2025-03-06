@@ -8,6 +8,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { Menu } from 'lucide-react';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import CartDropdown from './cart/cart-dropdown';
 import {
   Sheet,
   SheetContent,
@@ -87,6 +88,9 @@ export const Navbar = () => {
         
         {/* Right side: theme toggle and auth */}
         <div className="flex items-center gap-4">
+          {/* Cart Dropdown */}
+          <CartDropdown />
+          
           <ThemeToggle />
           
           {/* Desktop auth */}
