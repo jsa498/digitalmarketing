@@ -122,7 +122,7 @@ export default function CoursePage({ params }: { params: { id: string } }) {
       title: product.title,
       price: product.price,
       imageUrl: product.imageUrl,
-    });
+    }, session?.user?.id);
     
     toast.success('Added to cart');
   };

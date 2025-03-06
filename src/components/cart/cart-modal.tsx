@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { ShoppingCart, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import Image from 'next/image';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -20,23 +20,13 @@ export default function CartModal() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { items, removeItem, getItemCount, getTotalPrice, clearCart, syncWithSupabase } = useCartStore();
   const { data: session } = useSession();
+  const { items, removeItem, getItemCount, getTotalPrice, clearCart } = useCartStore();
   
-  // Handle hydration mismatch and initialize Supabase sync
+  // Handle hydration mismatch
   useEffect(() => {
     setMounted(true);
-    
-    // Initialize Supabase sync if user is logged in
-    if (session?.user?.id) {
-      syncWithSupabase(session.user.id).then(cleanup => {
-        // Return cleanup function to be called on unmount
-        return () => {
-          cleanup();
-        };
-      });
-    }
-  }, [session?.user?.id, syncWithSupabase]);
+  }, []);
   
   if (!mounted) return null;
   
@@ -70,7 +60,7 @@ export default function CartModal() {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    onClick={() => clearCart()}
+                    onClick={() => clearCart(session?.user?.id)}
                     className="h-9 px-4 text-sm hover:bg-destructive/10 hover:text-destructive"
                   >
                     Clear All
@@ -134,7 +124,7 @@ export default function CartModal() {
                         variant="ghost"
                         size="icon"
                         className="h-9 w-9 flex-shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10 rounded-full"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItem(item.id, session?.user?.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
