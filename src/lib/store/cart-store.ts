@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { supabase } from '@/lib/supabase/client';
 import type { CartItem, CartItemInsert } from '@/lib/supabase/client';
 
@@ -177,7 +177,14 @@ export const useCartStore = create<CartStore>()(
     }),
     {
       name: 'shopping-cart',
-      skipHydration: true,
+      storage: createJSONStorage(() => localStorage),
+      skipHydration: false,
+      partialize: (state) => ({ items: state.items }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.initialized = false;
+        }
+      },
     }
   )
 ); 
