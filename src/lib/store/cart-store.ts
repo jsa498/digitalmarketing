@@ -108,6 +108,12 @@ export const useCartStore = create<CartStore>()(
 
       syncWithSupabase: async (userId) => {
         try {
+          // First, cleanup any existing subscription
+          const { subscription } = get();
+          if (subscription) {
+            subscription.unsubscribe();
+          }
+
           // Fetch existing cart items
           const { data: cartItems, error } = await supabase
             .from('cart_items')
@@ -127,43 +133,54 @@ export const useCartStore = create<CartStore>()(
           // Update local state
           set({ items: localItems, initialized: true });
 
-          // Set up real-time subscription if not already set
-          const { subscription } = get();
-          if (!subscription) {
-            const newSubscription = supabase
-              .channel('cart_changes')
-              .on(
-                'postgres_changes',
-                {
-                  event: '*',
-                  schema: 'public',
-                  table: 'cart_items',
-                  filter: `user_id=eq.${userId}`
-                },
-                async (payload) => {
-                  // Refetch all cart items to ensure consistency
-                  const { data: updatedItems } = await supabase
-                    .from('cart_items')
-                    .select('*')
-                    .eq('user_id', userId);
+          // Set up real-time subscription
+          const channelId = `cart:${userId}`;
+          const newSubscription = supabase
+            .channel(channelId)
+            .on(
+              'postgres_changes',
+              {
+                event: '*',
+                schema: 'public',
+                table: 'cart_items',
+                filter: `user_id=eq.${userId}`
+              },
+              async (payload) => {
+                console.log('Received real-time update:', payload);
+                
+                // Refetch all cart items to ensure consistency
+                const { data: updatedItems, error: refetchError } = await supabase
+                  .from('cart_items')
+                  .select('*')
+                  .eq('user_id', userId);
 
-                  if (updatedItems) {
-                    const localUpdatedItems = updatedItems.map(item => ({
-                      id: item.product_id,
-                      title: item.title,
-                      price: item.price,
-                      imageUrl: item.image_url
-                    }));
-                    set({ items: localUpdatedItems });
-                  }
+                if (refetchError) {
+                  console.error('Error refetching cart items:', refetchError);
+                  return;
                 }
-              )
-              .subscribe();
 
-            set({ subscription: newSubscription });
-          }
+                if (updatedItems) {
+                  const localUpdatedItems = updatedItems.map(item => ({
+                    id: item.product_id,
+                    title: item.title,
+                    price: item.price,
+                    imageUrl: item.image_url
+                  }));
+                  
+                  console.log('Updating local cart state:', localUpdatedItems);
+                  set({ items: localUpdatedItems });
+                }
+              }
+            )
+            .subscribe((status) => {
+              console.log(`Supabase real-time subscription status: ${status}`);
+            });
+
+          set({ subscription: newSubscription });
         } catch (error) {
           console.error('Error syncing with Supabase:', error);
+          // Reset initialized state on error
+          set({ initialized: false });
         }
       },
 
@@ -171,7 +188,7 @@ export const useCartStore = create<CartStore>()(
         const { subscription } = get();
         if (subscription) {
           subscription.unsubscribe();
-          set({ subscription: null });
+          set({ subscription: null, initialized: false });
         }
       }
     }),
@@ -182,7 +199,7 @@ export const useCartStore = create<CartStore>()(
       partialize: (state) => ({ items: state.items }),
       onRehydrateStorage: () => (state) => {
         if (state) {
-          state.initialized = false;
+          state.initialized = false; // Reset initialized state on rehydration
         }
       },
     }
